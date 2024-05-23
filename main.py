@@ -1,4 +1,4 @@
-"""Process that obtains fresh news from a news website."""
+"""Process that extracts fresh news from a news website."""
 from RPA.Browser.Selenium import Selenium
 from datetime import datetime, timedelta
 import time
