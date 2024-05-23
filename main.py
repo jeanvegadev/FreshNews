@@ -40,6 +40,7 @@ class LATimesScraper:
         if self.browser.is_element_visible(label_xpath):
             checkbox_input_xpath = f"{label_xpath}//input[@type='checkbox']"
             self.browser.select_checkbox(checkbox_input_xpath)
+            time.sleep(5)
         else:
             log.warning(f"Checkbox for topic '{self.topic}' not found.")
 
@@ -49,12 +50,20 @@ class LATimesScraper:
             "xpath://select[@name='s']", timeout=10)
         select_element_xpath = "//select[@name='s']"
         self.browser.select_from_list_by_value(select_element_xpath, "1")
+        time.sleep(5)
 
     def is_article_within_date_range(self, article_date):
         """Check if the article date is within the specified dates."""
         today = datetime.today()
-        start_date = today - timedelta(days=self.number_of_months * 30)
-        return start_date <= article_date <= today
+        if self.number_of_months == 0:
+            start_date = datetime(today.year, today.month, 1)
+        else:
+            start_date = datetime(today.year,
+                                  today.month - number_of_months + 1,
+                                  1)
+        print(start_date)
+        print(article_date)
+        return start_date <= article_date
 
     def scrape_news_articles(self):
         """Scrape news articles on the current page."""
@@ -119,12 +128,11 @@ class LATimesScraper:
         self.search_for_phrase()
         self.select_topic_checkbox()
         self.select_newest_option()
-        self.scrape_news_articles()
-        # while True:
-        #     if not self.scrape_news_articles():
-        #         break
-            # if not self.navigate_to_next_page():
-            #     break
+        while True:
+            if not self.scrape_news_articles():
+                break
+            if not self.navigate_to_next_page():
+                break
         self.browser.close_all_browsers()
         self.save_to_excel("scraped_news.xlsx")
 
@@ -132,6 +140,6 @@ class LATimesScraper:
 if __name__ == "__main__":
     search_phrase = "climate change"
     topic = "California"
-    number_of_months = 1  # Example: current and previous month
+    number_of_months = 1  # Example
     scraper = LATimesScraper(search_phrase, topic, number_of_months)
     scraper.run()
