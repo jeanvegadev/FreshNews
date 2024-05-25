@@ -26,7 +26,7 @@ class BaseProc(object):
         self.log_file = self.dir_log / f'scraper_{self.current_datetime}.log'
         # Configure logging
         logging.basicConfig(filename=self.log_file,
-                            level=logging.INFO,
+                            level=logging.DEBUG,
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.log = logging.getLogger(__name__)
         return self.log
