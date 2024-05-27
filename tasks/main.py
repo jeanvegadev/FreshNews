@@ -3,9 +3,8 @@ from RPA.Browser.Selenium import Selenium
 from datetime import datetime
 import time
 import pandas as pd
-from base import log, config
-from utils import retry_decorator
-import os
+from resources.base import log, config, base
+from resources.utils import retry_decorator
 import urllib.request
 import re
 import sys
@@ -111,7 +110,7 @@ class LATimesScraper:
                 return False
 
             if image_src:
-                image_path = os.path.join('images', image_filename)
+                image_path = base.dir_output / image_filename
                 self.download_image(image_src, image_path)
 
             self.articles_data.append({
@@ -178,7 +177,8 @@ class LATimesScraper:
                                         self.contains_money_format,
                                         axis=1)
         df_cleaned = df.drop_duplicates()
-        df_cleaned.to_excel(file_name, index=False)
+        file_path = base.dir_ouput / config["excel_output"]
+        df_cleaned.to_excel(file_path, index=False)
 
     def run(self):
         self.open_website()
@@ -191,7 +191,7 @@ class LATimesScraper:
             if not self.navigate_to_next_page():
                 break
         self.browser.close_all_browsers()
-        self.save_to_excel("scraped_news.xlsx")
+        self.save_to_excel()
 
 
 if __name__ == "__main__":

@@ -28,6 +28,8 @@ class BaseProc(object):
             self.dir_home = Path(os.getcwd())
 
         self.dir_log = self.dir_home / "logs"
+        self.dir_config = self.dir_home / "config"
+        self.dir_output = self.dir_home / "output"
 
     def cargar_entorno(self):
         self.current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -38,7 +40,7 @@ class BaseProc(object):
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.log = logging.getLogger(__name__)
 
-        file_config = self.dir_home / self.config_filename
+        file_config = self.dir_config / self.config_filename
         config = configparser.ConfigParser()
         config.read(str(file_config))
         self.config_default = config[self.config_context]

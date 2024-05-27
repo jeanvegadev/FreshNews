@@ -1,4 +1,3 @@
 venv/
 logs/
-images/
-*.xlsx
+output/

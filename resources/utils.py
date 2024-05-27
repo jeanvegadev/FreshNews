@@ -1,5 +1,5 @@
 """Useful functions."""
-from base import log
+from resources.base import log
 import time
 
 

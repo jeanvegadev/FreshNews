@@ -1,1 +1,0 @@
-rpaframework==28.6.0
