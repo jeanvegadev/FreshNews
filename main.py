@@ -3,25 +3,32 @@ from RPA.Browser.Selenium import Selenium
 from datetime import datetime
 import time
 import pandas as pd
-from base import log
+from base import log, config
+from utils import retry_decorator
 import os
 import urllib.request
 import re
+import sys
+
+retries = int(config['retries'])
+delay = int(config['delay'])
 
 
 class LATimesScraper:
     def __init__(self, search_phrase, topic, number_of_months):
         self.browser = Selenium()
-        self.url_website = "https://www.latimes.com/"
+        self.url_website = config['url_website']
         self.search_phrase = search_phrase
         self.topic = topic
         self.number_of_months = number_of_months
         self.articles_data = []
 
+    @retry_decorator(retries=retries, delay=delay)
     def open_website(self):
         log.info("Opening website")
         self.browser.open_available_browser(self.url_website)
 
+    @retry_decorator(retries=retries, delay=delay)
     def search_for_phrase(self):
         log.info(f"Searching for phrase: {self.search_phrase}")
         self.browser.click_element(
@@ -37,23 +44,27 @@ class LATimesScraper:
             "\uE007")
         self.browser.wait_until_page_contains("Search results", timeout=10)
 
+    @retry_decorator(retries=delay, delay=delay)
     def select_topic_checkbox(self):
         log.info(f"Selecting topic checkbox for: {self.topic}")
         label_xpath = f"//label[contains(., '{self.topic}')]"
         if self.browser.is_element_visible(label_xpath):
             checkbox_input_xpath = f"{label_xpath}//input[@type='checkbox']"
             self.browser.select_checkbox(checkbox_input_xpath)
+            self.browser.wait_until_page_contains(
+                "Selected Filters", timeout=10)
             time.sleep(5)
         else:
             log.warning(f"Checkbox for topic '{self.topic}' not found.")
 
+    @retry_decorator(retries=retries, delay=delay)
     def select_newest_option(self):
         log.info("Selecting 'Newest' option from dropdown.")
-        self.browser.wait_until_element_is_visible(
-            "xpath://select[@name='s']", timeout=10)
         select_element_xpath = "//select[@name='s']"
         self.browser.select_from_list_by_value(select_element_xpath, "1")
-        time.sleep(10)
+        self.browser.wait_until_element_is_visible(
+            "xpath=//select[@name='s']/option[@value='1' and @selected]",
+            timeout=10)
 
     def is_article_within_date_range(self, article_date):
         """Check if the article date is within the specified dates."""
@@ -66,6 +77,7 @@ class LATimesScraper:
                                   1)
         return start_date <= article_date
 
+    @retry_decorator(retries=retries, delay=delay)
     def download_image(self, img_url, save_path):
         """Download image from URL and save to the specified path."""
         try:
@@ -74,19 +86,18 @@ class LATimesScraper:
         except Exception as e:
             log.error(f"Failed to save image: {e}")
 
+    @retry_decorator(retries=retries, delay=delay)
     def scrape_news_articles(self):
         """Scrape news articles on the current page."""
         log.info("Scraping news articles on the current page.")
-        self.browser.wait_until_element_is_visible(
-            "xpath=//li/ps-promo", timeout=10)
         articles = self.browser.get_webelements("xpath=//li/ps-promo")
         for article in articles:
             title = article.find_element(
                 "xpath", ".//h3/a").text
             date_str = article.find_element(
-                "xpath", "./div/div[2]/p[2]").text
+                "xpath", ".//p[@class='promo-timestamp']").text
             description = article.find_element(
-                "xpath", "./div/div[2]/p[1]").text
+                "xpath", ".//p[@class='promo-description']").text
             article_date = self.parse_article_date(date_str)
             image_src = article.find_element(
                 "xpath", ".//picture/img").get_attribute("src")
@@ -122,12 +133,14 @@ class LATimesScraper:
             article_date = datetime.today()
         return article_date
 
+    @retry_decorator(retries=retries, delay=delay)
     def navigate_to_next_page(self):
         """Navigate to the next page if available."""
-        next_page_button_xpath = "//main/div[2]/div[3]"
+        next_page_button_xpath = "//div\
+            [@class='search-results-module-next-page']/a"
         if self.browser.is_element_visible(next_page_button_xpath):
             self.browser.click_element(next_page_button_xpath)
-            time.sleep(5)  # Wait for the next page to load
+            time.sleep(5)
             return True
         return False
 
@@ -164,7 +177,8 @@ class LATimesScraper:
         df['Contains Money Format'] = df.apply(
                                         self.contains_money_format,
                                         axis=1)
-        df.to_excel(file_name, index=False)
+        df_cleaned = df.drop_duplicates()
+        df_cleaned.to_excel(file_name, index=False)
 
     def run(self):
         self.open_website()
@@ -181,8 +195,13 @@ class LATimesScraper:
 
 
 if __name__ == "__main__":
-    search_phrase = "climate change"
-    topic = "California"
-    number_of_months = 1  # Example
-    scraper = LATimesScraper(search_phrase, topic, number_of_months)
-    scraper.run()
+    try:
+        search_phrase = "climate change"
+        topic = "California"
+        number_of_months = 1
+        scraper = LATimesScraper(search_phrase, topic, number_of_months)
+        scraper.run()
+        sys.exit(0)
+    except Exception as e:
+        log.error(str(e), exc_info=True)
+        sys.exit(1)

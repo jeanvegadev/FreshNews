@@ -1,14 +1,22 @@
-
+"""Base class for configuration."""
 import logging
 from datetime import datetime
 import os
 from pathlib import Path
+import configparser
 
 
 class BaseProc(object):
-    def __init__(self):
+    def __init__(self,
+                 config_filename="config.ini",
+                 config_context="DEFAULT"):
+        self.config = None
+        self.config_filename = config_filename
+        self.config_context = config_context
+
         self.current_datetime = None
         self.log_filename = None
+        self.url = None
 
         self.environment = "prod"
         if 'VIRTUAL_ENV' in os.environ:
@@ -29,8 +37,14 @@ class BaseProc(object):
                             level=logging.DEBUG,
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.log = logging.getLogger(__name__)
-        return self.log
+
+        file_config = self.dir_home / self.config_filename
+        config = configparser.ConfigParser()
+        config.read(str(file_config))
+        self.config_default = config[self.config_context]
+
+        return self.log, self.config_default
 
 
 base = BaseProc()
-log = base.cargar_entorno()
+log, config = base.cargar_entorno()
