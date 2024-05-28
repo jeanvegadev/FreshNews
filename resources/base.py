@@ -1,4 +1,5 @@
 """Base class for configuration."""
+from RPA.Robocorp.WorkItems import WorkItems
 import logging
 from datetime import datetime
 import os
@@ -13,6 +14,9 @@ class BaseProc(object):
         self.config = None
         self.config_filename = config_filename
         self.config_context = config_context
+        self.search_phrase = None
+        self.topic = None
+        self.number_of_months = None
 
         self.current_datetime = None
         self.log_filename = None
@@ -32,6 +36,12 @@ class BaseProc(object):
         self.dir_output = self.dir_home / "output"
 
     def cargar_entorno(self):
+        wi = WorkItems()
+        wi.get_input_work_item()
+        self.search_phrase = wi.get_work_item_variable("search_phrase")
+        self.topic = wi.get_work_item_variable("topic")
+        self.number_of_months = wi.get_work_item_variable("number_of_months")
+
         self.current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.log_file = self.dir_log / f'scraper_{self.current_datetime}.log'
         # Configure logging

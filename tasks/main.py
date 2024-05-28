@@ -21,6 +21,7 @@ class LATimesScraper:
         self.topic = topic
         self.number_of_months = number_of_months
         self.articles_data = []
+        self.timeout_web = config['timeout_web']
 
     @retry_decorator(retries=retries, delay=delay)
     def open_website(self):
@@ -34,14 +35,15 @@ class LATimesScraper:
             "xpath://button[@data-element='search-button']")
         self.browser.wait_until_element_is_visible(
             "xpath://input[@data-element='search-form-input']",
-            timeout=10)
+            timeout=self.timeout_web)
         self.browser.input_text(
             "xpath://input[@data-element='search-form-input']",
             self.search_phrase)
         self.browser.press_keys(
             "xpath://input[@data-element='search-form-input']",
             "\uE007")
-        self.browser.wait_until_page_contains("Search results", timeout=10)
+        self.browser.wait_until_page_contains("Search results",
+                                              timeout=self.timeout_web)
 
     @retry_decorator(retries=delay, delay=delay)
     def select_topic_checkbox(self):
@@ -51,7 +53,7 @@ class LATimesScraper:
             checkbox_input_xpath = f"{label_xpath}//input[@type='checkbox']"
             self.browser.select_checkbox(checkbox_input_xpath)
             self.browser.wait_until_page_contains(
-                "Selected Filters", timeout=10)
+                "Selected Filters", timeout=self.timeout_web)
             time.sleep(5)
         else:
             log.warning(f"Checkbox for topic '{self.topic}' not found.")
@@ -63,7 +65,7 @@ class LATimesScraper:
         self.browser.select_from_list_by_value(select_element_xpath, "1")
         self.browser.wait_until_element_is_visible(
             "xpath=//select[@name='s']/option[@value='1' and @selected]",
-            timeout=10)
+            timeout=self.timeout_web)
 
     def is_article_within_date_range(self, article_date):
         """Check if the article date is within the specified dates."""
@@ -196,9 +198,9 @@ class LATimesScraper:
 
 if __name__ == "__main__":
     try:
-        search_phrase = "climate change"
-        topic = "California"
-        number_of_months = 1
+        search_phrase = base.search_phrase
+        topic = base.topic
+        number_of_months = base.number_of_months
         scraper = LATimesScraper(search_phrase, topic, number_of_months)
         scraper.run()
         sys.exit(0)
