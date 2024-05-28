@@ -10,19 +10,19 @@ import re
 import sys
 import os
 
-retries = int(config['retries'])
-delay = int(config['delay'])
+retries = int(os.getenv("retries"))
+delay = int(os.getenv("delay"))
 
 
 class LATimesScraper:
     def __init__(self, search_phrase, topic, number_of_months):
         self.browser = Selenium()
         self.url_website = os.getenv("url_website")
+        self.timeout_web = os.getenv("timeout_web")
         self.search_phrase = search_phrase
         self.topic = topic
         self.number_of_months = number_of_months
         self.articles_data = []
-        self.timeout_web = config['timeout_web']
 
     @retry_decorator(retries=retries, delay=delay)
     def open_website(self):
