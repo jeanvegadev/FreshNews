@@ -8,6 +8,7 @@ from resources.utils import retry_decorator
 import urllib.request
 import re
 import sys
+import os
 
 retries = int(config['retries'])
 delay = int(config['delay'])
@@ -16,7 +17,7 @@ delay = int(config['delay'])
 class LATimesScraper:
     def __init__(self, search_phrase, topic, number_of_months):
         self.browser = Selenium()
-        self.url_website = config['url_website']
+        self.url_website = os.getenv("url_website")
         self.search_phrase = search_phrase
         self.topic = topic
         self.number_of_months = number_of_months
@@ -104,7 +105,7 @@ class LATimesScraper:
                 "xpath", ".//picture/img").get_attribute("src")
             image_filename = image_src.split('/')[-1] if image_src else ""
             image_filename = image_filename.split('%2F')[-1]
-            if image_filename.lower()[-3:] not in ("jpg", "png", "jpeg"):
+            if image_filename.lower()[-4:] not in (".jpg", ".png", "jpeg"):
                 image_filename = image_filename + ".jpg"
 
             if not self.is_article_within_date_range(article_date):
