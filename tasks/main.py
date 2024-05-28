@@ -184,6 +184,7 @@ class LATimesScraper:
         df_cleaned.to_excel(file_path, index=False)
 
     def run(self):
+        """Run the scraper."""
         self.open_website()
         self.search_for_phrase()
         self.select_topic_checkbox()
