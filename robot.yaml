@@ -2,3 +2,6 @@ tasks:
   Run scraping task:
     robotTask: true
     shell: python -m tasks.main
+
+artifactsDir: artifacts
+condaConfigFile: conda.yaml
