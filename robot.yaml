@@ -3,5 +3,5 @@ tasks:
     robotTask: true
     shell: python -m tasks.main
 
-artifactsDir: artifacts
+artifactsDir: output
 condaConfigFile: conda.yaml
