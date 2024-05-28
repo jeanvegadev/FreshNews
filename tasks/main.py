@@ -104,7 +104,7 @@ class LATimesScraper:
                 "xpath", ".//picture/img").get_attribute("src")
             image_filename = image_src.split('/')[-1] if image_src else ""
             image_filename = image_filename.split('%2F')[-1]
-            if image_filename.lower()[-3:] not in ("jpg", "png"):
+            if image_filename.lower()[-3:] not in ("jpg", "png", "jpeg"):
                 image_filename = image_filename + ".jpg"
 
             if not self.is_article_within_date_range(article_date):
@@ -179,7 +179,7 @@ class LATimesScraper:
                                         self.contains_money_format,
                                         axis=1)
         df_cleaned = df.drop_duplicates()
-        file_path = base.dir_ouput / config["excel_output"]
+        file_path = base.dir_output / config["excel_output"]
         df_cleaned.to_excel(file_path, index=False)
 
     def run(self):
