@@ -31,7 +31,6 @@ class BaseProc(object):
         else:
             self.dir_home = Path(os.getcwd())
 
-        self.dir_log = self.dir_home / "logs"
         self.dir_config = self.dir_home / "config"
         self.dir_output = self.dir_home / "output"
 
@@ -43,7 +42,8 @@ class BaseProc(object):
         self.number_of_months = wi.get_work_item_variable("number_of_months")
 
         self.current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
-        self.log_file = self.dir_log / f'scraper_{self.current_datetime}.log'
+        self.log_file = (
+            self.dir_output / f'scraper_{self.current_datetime}.log')
 
         if not os.path.exists(self.dir_output):
             os.makedirs(self.dir_output)
