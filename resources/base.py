@@ -48,9 +48,12 @@ class BaseProc(object):
         if not os.path.exists(self.dir_output):
             os.makedirs(self.dir_output)
         # Configure logging
-        logging.basicConfig(filename=self.log_file,
-                            level=logging.DEBUG,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(level=logging.DEBUG,
+                            format='%(asctime)s - %(levelname)s - %(message)s',
+                            handlers=[
+                                logging.FileHandler(self.log_file),
+                                logging.StreamHandler()
+                            ])
         self.log = logging.getLogger(__name__)
 
         file_config = self.dir_config / self.config_filename
