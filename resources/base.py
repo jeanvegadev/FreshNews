@@ -44,6 +44,9 @@ class BaseProc(object):
 
         self.current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.log_file = self.dir_log / f'scraper_{self.current_datetime}.log'
+
+        if not os.path.exists(self.dir_output):
+            os.makedirs(self.dir_output)
         # Configure logging
         logging.basicConfig(filename=self.log_file,
                             level=logging.DEBUG,

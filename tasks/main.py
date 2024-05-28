@@ -168,7 +168,7 @@ class LATimesScraper:
                 return True
         return False
 
-    def save_to_excel(self, file_name):
+    def save_to_excel(self):
         """Save the scraped data to an Excel file."""
         df = pd.DataFrame(self.articles_data)
         df['Search Phrases Count'] = df.apply(
