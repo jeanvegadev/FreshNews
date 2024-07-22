@@ -22,7 +22,7 @@ class BaseProc(object):
         self.log_filename = None
         self.url = None
 
-        self.environment = "prod"
+        self.environment = "dev"
         if 'VIRTUAL_ENV' in os.environ:
             self.environment = "dev"
 
@@ -35,12 +35,17 @@ class BaseProc(object):
         self.dir_output = self.dir_home / "output"
 
     def cargar_entorno(self):
-        wi = WorkItems()
-        wi.get_input_work_item()
-        self.search_phrase = wi.get_work_item_variable("search_phrase")
-        self.topic = wi.get_work_item_variable("topic")
-        self.number_of_months = wi.get_work_item_variable("number_of_months")
-
+        try:
+            wi = WorkItems()
+            wi.get_input_work_item()
+            self.search_phrase = wi.get_work_item_variable("search_phrase")
+            self.topic = wi.get_work_item_variable("topic")
+            self.number_of_months = wi.get_work_item_variable(
+                "number_of_months")
+        except Exception:
+            self.search_phrase = "climate change"
+            self.topic = "California"
+            self.number_of_months = 1
         self.current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.log_file = (
             self.dir_output / f'scraper_{self.current_datetime}.log')
